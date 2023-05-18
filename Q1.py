@@ -1,3 +1,40 @@
+# EXPLANATION: 
+# 
+# This Python script imports a data file (an Excel spreadsheet), cleans the data, performs a hypothesis 
+# test and several statistical calculations on it, and then prints out the results. 
+# 
+# Here's a breakdown of what each part of the script does:
+# 
+# Imports: The script first imports the necessary libraries. It uses pandas for data manipulation, scipy for 
+# statistical calculations, and numpy for numerical computations. 
+# 
+# AdDataAnalyzer class: The script defines a class AdDataAnalyzer to encapsulate all the functionality.
+# 
+# __init__ method: This is the initializer method for the class. It gets called when an object of the class is 
+# created. It does several things: 
+# 
+# Loads an Excel file into a pandas DataFrame. Drops any rows with missing values. Calls other methods in the class 
+# to clean the data, perform a hypothesis test, calculate proportions, and calculate statistics. clean_data method: 
+# This method cleans the data. It converts columns 'Impressions', 'Clicks', and 'Actions' to integer type. It also 
+# calculates conversion rate, clicks per impressions, and spent per actions. 
+# 
+# calculate_proportions method: This method calculates the proportion of total impressions, actions, and clicks each 
+# row has. 
+# 
+# calculate_statistics method: This method calculates and prints several statistics for each of two publishers: 
+# 'Bruiser.com' and 'Honey.com'. The statistics include percentiles and proportions of impressions, actions, clicks, 
+# conversion rates, and spent per action. 
+# 
+# hypothesis_test method: This method performs a hypothesis test to compare the conversion rates of 'Bruiser.com' and
+# 'Honey.com' with the average conversion rate for all other publishers. It uses a one-sample t-test and checks if 
+# the differences are significant at 90% and 95% confidence levels. 
+# 
+# AdDataAnalyzer('Data.xlsx'): This line creates an instance of the AdDataAnalyzer class, triggering the __init__ 
+# method and starting the whole process. 
+# 
+
+# CODE:
+
 import pandas as pd
 from scipy import stats
 import numpy as np
@@ -6,15 +43,15 @@ import numpy as np
 class AdDataAnalyzer:
     def __init__(self, data_file):
         self.df = pd.read_excel(data_file)
-        print(f"Number of rows before dropna: {len(self.df.index)}")
-        self.df.dropna(inplace=True)
-        print(f"Number of rows after dropna: {len(self.df.index)}")
         self.clean_data()
         self.hypothesis_test()
         self.calculate_proportions()
         self.calculate_statistics()
 
     def clean_data(self):
+        print(f"Number of rows before dropna: {len(self.df.index)}")
+        self.df.dropna(inplace=True)
+        print(f"Number of rows after dropna: {len(self.df.index)}")
         self.df['Impressions'] = self.df['Impressions'].replace(',', '').astype(int)
         self.df['Clicks'] = self.df['Clicks'].replace(',', '').astype(int)
         self.df['Actions'] = self.df['Actions'].replace(',', '').astype(int)
