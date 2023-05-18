@@ -21,10 +21,12 @@ from sklearn.preprocessing import PolynomialFeatures
 # Create Polynomial Features
 poly_reg = PolynomialFeatures(degree=4)
 X_poly = poly_reg.fit_transform(X)
+# Train-Test split
+X_poly_train, X_poly_test, y_poly_train, y_poly_test = train_test_split(X_poly, y, test_size=0.2, random_state=42)
 # Initialize and fit the model and predict
 lin_reg_2 = LinearRegression()
-lin_reg_2.fit(X_train, y_train)
-y_pred = lin_reg_2.predict(X_test)
+lin_reg_2.fit(X_poly_train, y_poly_train)
+y_pred = lin_reg_2.predict(X_poly_test)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # 3. Random Forest Regression ~~~~~~~~~~~~
