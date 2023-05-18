@@ -1,3 +1,45 @@
+# Q2a:
+#In this code, we calculate:
+# 1)Total Advertising Spend per advertiser by summing the 'spend' column for each advertiser.
+# 2)Customer Acquisition Cost (CAC) per advertiser by dividing the total spend
+#   by the total number of new customers for each advertiser.
+# 3)Customer Lifetime Value (CLV) per advertiser by calculating the product of the total
+#   number of transactions, average purchase value, and average customer lifespan for each advertiser.
+
+import pandas as pd
+
+# assuming this is my DataFrame:
+df = pd.DataFrame({
+    'advertiser': ['adv1', 'adv1', 'adv2', 'adv2', 'adv3', 'adv3'],
+    'spend': [100, 200, 300, 400, 500, 600],
+    'new_customers': [2, 2, 3, 3, 4, 4],
+    'total_transactions': [2, 4, 3, 5, 6, 8],
+    'purchase_value': [50, 100, 150, 200, 250, 300],
+    'customer_lifespan': [1, 2, 1, 2, 3, 3]
+})
+
+def calculate_kpis(df):
+    # Total Advertising Spend
+    total_spend = df.groupby('advertiser')['spend'].sum()
+    print(f"Total Advertising Spend:\n{total_spend}\n")
+
+    # Customer Acquisition Cost (CAC)
+    cac = df.groupby('advertiser').apply(lambda x: x['spend'].sum() / x['new_customers'].sum())
+    print(f"Customer Acquisition Cost (CAC):\n{cac}\n")
+
+    # Customer Lifetime Value (CLV)
+    clv = df.groupby('advertiser').apply(
+        lambda x: (x['total_transactions'].sum() * x['purchase_value'].mean() * x['customer_lifespan'].mean()))
+    print(f"Customer Lifetime Value (CLV):\n{clv}\n")
+
+calculate_kpis(df)
+
+
+# Q2b:
+# Below is a sample implementation for each of the requested regression models using a hypothetical dataset "data.csv".
+# the models are: linear Regression, Polynomial Regression, Random Forest Regression , 
+#                 XGboost, Neural Net Methods, Support Vector Machine(SVM)
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
