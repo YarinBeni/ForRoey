@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Android 13+: posting any notification needs this runtime permission (expo-notifications asks for it). -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <!-- Lets the burn-down frames land on time. Granted automatically on Android 12-13; on 14+ the user can allow it in app settings. We fall back to inexact alarms otherwise. -->
+  <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+  <application>
+    <receiver
+      android:name=".CigaretteStatusReceiver"
+      android:exported="false" />
+  </application>
+</manifest>

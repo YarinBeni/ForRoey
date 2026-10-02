@@ -1,11 +1,12 @@
 import { Link, useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BackIcon } from '../src/components/icons';
 import { TimeField } from '../src/components/TimeField';
 import { Button, Card, Row, SectionLabel, Stepper, Title } from '../src/components/ui';
 import { formatGap } from '../src/domain/format';
+import { previewStatusIcon, statusIconSupported } from '../modules/cigarette-status';
 import { requestNotificationPermission } from '../src/services/notifications';
 import { getSubscriptionService, useAppStore } from '../src/store/useAppStore';
 import { colors, spacing } from '../src/theme';
@@ -25,7 +26,7 @@ export default function SettingsScreen() {
     if (on) {
       const granted = await requestNotificationPermission();
       if (!granted) {
-        Alert.alert('Allow notifications', 'Turn on notifications for Pacer in the iOS Settings app, then come back here.');
+        Alert.alert('Allow notifications', 'Turn on notifications for Pacer in your phone settings, then come back here.');
         return;
       }
     }
@@ -53,7 +54,7 @@ export default function SettingsScreen() {
     subscription?.kind === 'active' ? 'Subscribed' : subscription?.kind === 'trial' ? 'Free trial' : 'Trial ended';
   const subHint =
     subscription?.kind === 'active'
-      ? `${subscriptionService.priceLabel} · manage in the App Store`
+      ? `${subscriptionService.priceLabel} · manage in the ${Platform.OS === 'ios' ? 'App Store' : 'Play Store'}`
       : subscription?.kind === 'trial'
         ? `${subscription.daysLeft} days left, then ${subscriptionService.priceLabel}`
         : `Subscribe to keep your alerts going`;
@@ -107,8 +108,17 @@ export default function SettingsScreen() {
                   accessibilityLabel="Notifications"
                 />
               }
-              last
+              last={!statusIconSupported}
             />
+            {statusIconSupported ? (
+              <Row
+                label="Status bar cigarette"
+                hint="Burns down in the top bar while a window is open"
+                right={<Text style={styles.link}>Preview</Text>}
+                onPress={() => previewStatusIcon(2 * 60_000)}
+                last
+              />
+            ) : null}
           </Card>
         </View>
 
@@ -140,6 +150,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.ground, paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   value: { fontSize: 15, fontWeight: '700', color: colors.muted },
+  link: { fontSize: 15, fontWeight: '700', color: colors.teal },
   subCard: { gap: 8, padding: 16, borderRadius: 16, backgroundColor: colors.surface },
   subTitle: { fontSize: 16, fontWeight: '800', color: colors.ink },
   subHint: { fontSize: 14, color: colors.muted },

@@ -11,6 +11,7 @@ import { buildDayLog, mergeSlotStatuses } from '../domain/schedule';
 import { addDays, dateKeyInTz } from '../domain/time';
 import { DEFAULT_SETTINGS, type DayLog, type PlanState, type Settings, type SlotStatus } from '../domain/types';
 import { cancelAllSlotNotifications, syncScheduledNotifications } from '../services/notifications';
+import { cancelAllStatusWindows, clearStatusIcon, scheduleStatusWindows } from '../../modules/cigarette-status';
 import {
   loadDayLog,
   loadPlan,
@@ -86,12 +87,31 @@ async function syncNotifications(settings: Settings, logs: DayLog[]): Promise<vo
   try {
     if (settings.notificationsEnabled) {
       await syncScheduledNotifications(logs, settings.minGapMinutes);
+      syncStatusIcon(settings, logs);
     } else {
       await cancelAllSlotNotifications();
+      cancelAllStatusWindows();
     }
   } catch (err) {
     console.warn('[store] notification sync failed', err);
   }
+}
+
+/**
+ * Mirror the pending slots into the Android status-bar icon scheduler: one
+ * window per pending slot, each lasting one minimum gap. A slot that opened
+ * recently and is still unanswered is included so its burn-down resumes.
+ */
+function syncStatusIcon(settings: Settings, logs: DayLog[]): void {
+  const windowMs = settings.minGapMinutes * 60_000;
+  const nowMs = Date.now();
+  const windows = logs.flatMap((log) =>
+    log.slots
+      .filter((slot) => slot.status === 'pending')
+      .map((slot) => ({ id: `${log.dateKey}:${slot.index}`, openAtMs: Date.parse(slot.scheduledAtIso), windowMs }))
+      .filter((w) => w.openAtMs + w.windowMs > nowMs),
+  );
+  scheduleStatusWindows(windows);
 }
 
 /** Load the current window of logs from storage (without regenerating). */
@@ -182,7 +202,8 @@ export const useAppStore = create<AppState>()((set, get) => ({
       tomorrowLog: tomorrowLog?.dateKey === dateKey ? updated : tomorrowLog,
     });
 
-    // A smoked/skipped slot no longer needs a reminder.
+    // A smoked/skipped slot no longer needs a reminder or a status icon.
+    clearStatusIcon();
     await syncNotifications(settings, await loadWindow(settings));
   },
 

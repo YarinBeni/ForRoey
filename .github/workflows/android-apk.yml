@@ -1,0 +1,40 @@
+# Builds an installable Android APK of Pacer with Expo's EAS cloud builder.
+#
+# One-time setup: create a free account at https://expo.dev, make an access
+# token (Account settings -> Access tokens) and add it to this repository as
+# the secret EXPO_TOKEN (Settings -> Secrets and variables -> Actions).
+# Then run this workflow from the Actions tab; the log ends with a link to
+# the APK, which you can open on the phone to install it.
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+
+      - name: Typecheck, lint and test
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+
+      - name: Build APK on EAS
+        run: eas build --platform android --profile preview --non-interactive --wait

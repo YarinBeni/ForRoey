@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CloseIcon } from '../src/components/icons';
 import { Body, Button, Chip, Title } from '../src/components/ui';
@@ -66,7 +66,7 @@ export default function PaywallScreen() {
           <Title size={34}>Keep going, for less than a pack.</Title>
           <Body>
             Pacer stays free for your first {trialDays} days. After that it is {subscriptionService.priceLabel}. Cancel any
-            time in the App Store.
+            time in the {Platform.OS === 'ios' ? 'App Store' : 'Play Store'}.
           </Body>
         </View>
 
