@@ -3,9 +3,10 @@ import { Link, Redirect } from 'expo-router';
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BurningCigarette } from '../src/components/BurningCigarette';
 import { GearIcon } from '../src/components/icons';
 import { Body, Button, Chip, Dots, Eyebrow } from '../src/components/ui';
-import { formatClock, formatCountdown, formatGap, formatLongDate, formatShortDate } from '../src/domain/format';
+import { formatClock, formatCountdown, formatGap, formatLongDate, formatShortDate, formatWindowLeft } from '../src/domain/format';
 import { quitDateKey, stageInfo } from '../src/domain/plan';
 import { formatMinuteOfDay } from '../src/domain/time';
 import type { Slot } from '../src/domain/types';
@@ -19,7 +20,7 @@ export default function HomeScreen() {
   const todayLog = useAppStore((s) => s.todayLog);
   const subscription = useAppStore((s) => s.subscription);
   const markSlot = useAppStore((s) => s.markSlot);
-  const now = useNow();
+  const now = useNow(1000);
 
   const slots = useMemo(() => todayLog?.slots ?? [], [todayLog]);
   const nowMs = now.getTime();
@@ -54,17 +55,27 @@ export default function HomeScreen() {
 
   // ---- Alert state: a slot is open right now -------------------------------
   if (openSlot) {
+    // The window lasts one minimum gap; the cigarette burns down over it.
+    const openedMs = new Date(openSlot.scheduledAtIso).getTime();
+    const windowMs = settings.minGapMinutes * 60_000;
+    const progress = (nowMs - openedMs) / windowMs;
+    const closed = progress >= 1;
     return (
       <SafeAreaView style={[styles.screen, { backgroundColor: colors.teal }]}>
         <View style={styles.alertBody}>
           <Eyebrow light>Window open since {formatClock(openSlot.scheduledAtIso, settings.timeZone)}</Eyebrow>
-          <Text style={styles.alertTitle}>You can smoke now.</Text>
+          <Text style={styles.alertTitle}>{closed ? 'Window closed.' : 'You can smoke now.'}</Text>
           <Text style={styles.alertText}>
-            Or skip it. Skipped slots count toward your step-down. Either way, the next alert is at least{' '}
-            {formatGap(settings.minGapMinutes)} away.
+            {closed
+              ? 'Still log it so your day stays honest. The next alert is on its way.'
+              : `Or skip it. Skipped slots count toward your step-down. Either way, the next alert is at least ${formatGap(settings.minGapMinutes)} away.`}
           </Text>
         </View>
-        <View style={{ alignItems: 'center', gap: 14 }}>
+        <View style={{ alignItems: 'center', gap: 12 }}>
+          <BurningCigarette progress={progress} />
+          <Text style={[styles.caption, { color: '#FFFFFF' }]}>{formatWindowLeft(openedMs + windowMs - nowMs)}</Text>
+        </View>
+        <View style={{ alignItems: 'center', gap: 14, marginTop: 28 }}>
           <Dots total={slots.length} done={done} nextIndex={openSlot.index} onDark />
           <Text style={[styles.caption, { color: colors.tealLight }]}>
             Slot {openSlot.index + 1} of {slots.length} · Stage {stage.stageNumber}
@@ -178,7 +189,7 @@ const styles = StyleSheet.create({
   listDivider: { borderBottomWidth: 1, borderBottomColor: colors.line },
   listTime: { fontSize: 16, fontWeight: '700', color: colors.ink, fontVariant: ['tabular-nums'] },
   listStatus: { fontSize: 14, fontWeight: '700' },
-  alertBody: { alignItems: 'center', gap: 10, paddingTop: 90, paddingBottom: 30, paddingHorizontal: 8 },
+  alertBody: { alignItems: 'center', gap: 10, paddingTop: 56, paddingBottom: 28, paddingHorizontal: 8 },
   alertTitle: { fontSize: 44, lineHeight: 48, fontWeight: '800', letterSpacing: -1, color: '#FFFFFF', textAlign: 'center' },
   alertText: { fontSize: 17, lineHeight: 25, color: colors.tealLight, textAlign: 'center', maxWidth: 300 },
 });

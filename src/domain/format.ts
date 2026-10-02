@@ -42,3 +42,12 @@ export function tzOffsetLabel(timeZone: string, at = new Date()): string {
     return '';
   }
 }
+
+/** "Window closes in 22 min" / "Window closed". */
+export function formatWindowLeft(ms: number): string {
+  if (ms <= 0) return 'Window closed';
+  const totalSec = Math.ceil(ms / 1000);
+  if (totalSec < 60) return `Window closes in ${totalSec} s`;
+  const min = Math.ceil(totalSec / 60);
+  return `Window closes in ${min} min`;
+}
