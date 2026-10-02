@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="cig_channel_name">חלון עישון</string>
+  <string name="cig_channel_desc">מציג סיגריה נשרפת בשורת המצב כל עוד חלון העישון פתוח.</string>
+  <string name="cig_title_open">אפשר לעשן עכשיו</string>
+  <string name="cig_title_closed">חלון העישון נסגר</string>
+  <string name="cig_text_open">הסיגריה נגמרת כשהחלון נסגר.</string>
+  <string name="cig_text_closed">פתח את Pacer כדי לרשום.</string>
+</resources>

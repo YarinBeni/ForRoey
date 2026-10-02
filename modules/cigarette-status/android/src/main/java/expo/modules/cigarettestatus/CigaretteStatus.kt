@@ -40,6 +40,10 @@ object CigaretteStatus {
 
   private const val PREFS = "expo.modules.cigarettestatus"
   private const val KEY_IDS = "scheduledIds"
+  private const val KEY_TITLE_OPEN = "titleOpen"
+  private const val KEY_TITLE_CLOSED = "titleClosed"
+  private const val KEY_TEXT_OPEN = "textOpen"
+  private const val KEY_TEXT_CLOSED = "textClosed"
   private const val FRAME_REQUEST_CODE = 0x5158
   private const val TEAL = 0xFF157A6E.toInt()
 
@@ -53,10 +57,23 @@ object CigaretteStatus {
     R.drawable.ic_cig_6,
   )
 
+  /** Text shown in the notification, in the app's current language. Falls back to the string resources. */
+  fun setStrings(context: Context, titleOpen: String, titleClosed: String, textOpen: String, textClosed: String) {
+    prefs(context).edit()
+      .putString(KEY_TITLE_OPEN, titleOpen)
+      .putString(KEY_TITLE_CLOSED, titleClosed)
+      .putString(KEY_TEXT_OPEN, textOpen)
+      .putString(KEY_TEXT_CLOSED, textClosed)
+      .apply()
+  }
+
+  private fun text(context: Context, key: String, fallback: Int): String =
+    prefs(context).getString(key, null) ?: context.getString(fallback)
+
   fun ensureChannel(context: Context) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-    val channel = NotificationChannel(CHANNEL_ID, "Smoking window", NotificationManager.IMPORTANCE_LOW).apply {
-      description = "Shows a burning cigarette in the status bar while a smoking window is open."
+    val channel = NotificationChannel(CHANNEL_ID, context.getString(R.string.cig_channel_name), NotificationManager.IMPORTANCE_LOW).apply {
+      description = context.getString(R.string.cig_channel_desc)
       setShowBadge(false)
       enableVibration(false)
     }
@@ -109,8 +126,14 @@ object CigaretteStatus {
     val builder = NotificationCompat.Builder(context, CHANNEL_ID)
       .setSmallIcon(FRAME_ICONS[f])
       .setColor(TEAL)
-      .setContentTitle(if (finished) "Smoking window closed" else "You can smoke now")
-      .setContentText(if (finished) "Open Pacer to log it." else "The cigarette burns out when the window closes.")
+      .setContentTitle(
+        if (finished) text(context, KEY_TITLE_CLOSED, R.string.cig_title_closed)
+        else text(context, KEY_TITLE_OPEN, R.string.cig_title_open),
+      )
+      .setContentText(
+        if (finished) text(context, KEY_TEXT_CLOSED, R.string.cig_text_closed)
+        else text(context, KEY_TEXT_OPEN, R.string.cig_text_open),
+      )
       .setOngoing(!finished)
       .setOnlyAlertOnce(true)
       .setSilent(true)

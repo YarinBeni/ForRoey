@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="cig_channel_name">የማጨስ ጊዜ</string>
+  <string name="cig_channel_desc">የማጨስ ጊዜ ክፍት ሲሆን በሁኔታ አሞሌ ላይ የሚቃጠል ሲጋራ ያሳያል።</string>
+  <string name="cig_title_open">አሁን ማጨስ ይችላሉ</string>
+  <string name="cig_title_closed">የማጨስ ጊዜ ተዘግቷል</string>
+  <string name="cig_text_open">ጊዜው ሲዘጋ ሲጋራው ይጠፋል።</string>
+  <string name="cig_text_closed">ለመመዝገብ Pacerን ይክፈቱ።</string>
+</resources>

@@ -8,10 +8,11 @@
 import { create } from 'zustand';
 
 import { buildDayLog, mergeSlotStatuses } from '../domain/schedule';
+import { applyLanguage, t } from '../i18n';
 import { addDays, dateKeyInTz } from '../domain/time';
 import { DEFAULT_SETTINGS, type DayLog, type PlanState, type Settings, type SlotStatus } from '../domain/types';
 import { cancelAllSlotNotifications, syncScheduledNotifications } from '../services/notifications';
-import { cancelAllStatusWindows, clearStatusIcon, scheduleStatusWindows } from '../../modules/cigarette-status';
+import { cancelAllStatusWindows, clearStatusIcon, scheduleStatusWindows, setStatusStrings } from '../../modules/cigarette-status';
 import {
   loadDayLog,
   loadPlan,
@@ -111,6 +112,12 @@ function syncStatusIcon(settings: Settings, logs: DayLog[]): void {
       .map((slot) => ({ id: `${log.dateKey}:${slot.index}`, openAtMs: Date.parse(slot.scheduledAtIso), windowMs }))
       .filter((w) => w.openAtMs + w.windowMs > nowMs),
   );
+  setStatusStrings({
+    titleOpen: t('status.titleOpen'),
+    titleClosed: t('status.titleClosed'),
+    textOpen: t('status.textOpen'),
+    textClosed: t('status.textClosed'),
+  });
   scheduleStatusWindows(windows);
 }
 
@@ -141,6 +148,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
 
   async hydrate() {
     const [settings, plan] = await Promise.all([loadSettings(), loadPlan()]);
+    applyLanguage(settings.language);
 
     let todayLog: DayLog | null = null;
     let tomorrowLog: DayLog | null = null;

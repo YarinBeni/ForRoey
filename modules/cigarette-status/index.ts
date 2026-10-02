@@ -18,8 +18,11 @@ export type StatusWindow = {
   windowMs: number;
 };
 
+export type StatusStrings = { titleOpen: string; titleClosed: string; textOpen: string; textClosed: string };
+
 type NativeModule = {
   scheduleWindows(windows: StatusWindow[]): void;
+  setStrings(strings: StatusStrings): void;
   cancelAll(): void;
   clear(): void;
   preview(windowMs: number): void;
@@ -34,6 +37,11 @@ export const statusIconSupported = native !== null;
 
 export function scheduleStatusWindows(windows: StatusWindow[]): void {
   native?.scheduleWindows(windows);
+}
+
+/** Text for the status notification in the app's current language. */
+export function setStatusStrings(strings: StatusStrings): void {
+  native?.setStrings(strings);
 }
 
 export function cancelAllStatusWindows(): void {

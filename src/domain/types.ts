@@ -22,6 +22,8 @@ export type Settings = {
   startPerDay: number;
   /** How many days to stay at each per-day count before stepping down. Default 7. */
   daysPerStage: number;
+  /** UI language: a supported code, or 'system' to follow the phone. */
+  language: 'system' | 'en' | 'he' | 'ar' | 'ru' | 'am';
   /** Whether slot reminders should be scheduled. */
   notificationsEnabled: boolean;
 };
@@ -76,5 +78,6 @@ export const DEFAULT_SETTINGS: Settings = {
   minGapMinutes: 30,
   startPerDay: 5,
   daysPerStage: 7,
+  language: 'system',
   notificationsEnabled: true,
 };

@@ -4,6 +4,7 @@ import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CloseIcon } from '../src/components/icons';
 import { Body, Button, Chip, Title } from '../src/components/ui';
+import { t } from '../src/i18n';
 import { trialDaysFromConfig } from '../src/services/subscription';
 import { getSubscriptionService, useAppStore } from '../src/store/useAppStore';
 import { colors, spacing } from '../src/theme';
@@ -13,12 +14,6 @@ const subscriptionService = getSubscriptionService();
 const TERMS_URL = 'https://example.com/pacer/terms';
 const PRIVACY_URL = 'https://example.com/pacer/privacy';
 
-const PERKS = [
-  'Random alerts, only in your awake hours',
-  'A step-down plan that ends at zero',
-  'Your progress, streaks and quit date',
-];
-
 export default function PaywallScreen() {
   const router = useRouter();
   const subscription = useAppStore((s) => s.subscription);
@@ -27,6 +22,9 @@ export default function PaywallScreen() {
 
   const expired = subscription?.kind === 'expired';
   const trialDays = trialDaysFromConfig();
+  const price = t('paywall.perMonth', { price: subscriptionService.priceLabel });
+  const store = Platform.OS === 'ios' ? t('settings.appStore') : t('settings.playStore');
+  const perks = [t('paywall.perk1'), t('paywall.perk2'), t('paywall.perk3')];
 
   const run = async (action: () => Promise<unknown>, successTitle: string) => {
     setBusy(true);
@@ -35,14 +33,14 @@ export default function PaywallScreen() {
       await refreshSubscription();
       const status = useAppStore.getState().subscription;
       if (status?.kind === 'active') {
-        Alert.alert(successTitle, 'Thank you. Your alerts keep going.');
+        Alert.alert(successTitle, t('paywall.thanks'));
         if (router.canGoBack()) router.back();
         else router.replace('/');
       } else {
-        Alert.alert('Not active yet', 'We could not find an active subscription for this Apple ID.');
+        Alert.alert(t('paywall.notActiveTitle'), t('paywall.notActiveBody'));
       }
     } catch (e) {
-      Alert.alert('Purchase not completed', e instanceof Error ? e.message : 'Please try again.');
+      Alert.alert(t('paywall.failedTitle'), e instanceof Error ? e.message : t('paywall.tryAgain'));
     } finally {
       setBusy(false);
     }
@@ -52,26 +50,23 @@ export default function PaywallScreen() {
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={{ gap: 28, paddingBottom: spacing.lg }} showsVerticalScrollIndicator={false}>
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-          {!expired ? <CloseIcon.Button accessibilityLabel="Close" onPress={() => router.back()} /> : <View style={{ height: 44 }} />}
+          {!expired ? <CloseIcon.Button accessibilityLabel={t('common.close')} onPress={() => router.back()} /> : <View style={{ height: 44 }} />}
         </View>
 
         <View style={{ gap: 12 }}>
           {subscription?.kind === 'trial' ? (
             <Chip tone="amber">
-              {subscription.daysLeft === 0 ? 'Your free month ends today' : `Your free month ends in ${subscription.daysLeft} days`}
+              {subscription.daysLeft === 0 ? t('paywall.endsToday') : t('paywall.endsIn', { count: subscription.daysLeft })}
             </Chip>
           ) : expired ? (
-            <Chip tone="amber">Your free month has ended</Chip>
+            <Chip tone="amber">{t('paywall.ended')}</Chip>
           ) : null}
-          <Title size={34}>Keep going, for less than a pack.</Title>
-          <Body>
-            Pacer stays free for your first {trialDays} days. After that it is {subscriptionService.priceLabel}. Cancel any
-            time in the {Platform.OS === 'ios' ? 'App Store' : 'Play Store'}.
-          </Body>
+          <Title size={34}>{t('paywall.title')}</Title>
+          <Body>{t('paywall.body', { days: trialDays, price, store })}</Body>
         </View>
 
         <View style={{ gap: 14 }}>
-          {PERKS.map((perk) => (
+          {perks.map((perk) => (
             <View key={perk} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={styles.check}>
                 <Text style={styles.checkGlyph}>✓</Text>
@@ -82,28 +77,34 @@ export default function PaywallScreen() {
         </View>
 
         <View style={styles.priceCard}>
-          <View style={{ gap: 2 }}>
-            <Text style={styles.priceTitle}>Monthly</Text>
-            <Text style={styles.priceHint}>Billed monthly after the free month</Text>
+          <View style={{ gap: 2, flex: 1 }}>
+            <Text style={styles.priceTitle}>{t('paywall.monthly')}</Text>
+            <Text style={styles.priceHint}>{t('paywall.billedMonthly')}</Text>
           </View>
-          <Text style={styles.price}>{subscriptionService.priceLabel}</Text>
+          <Text style={styles.price}>{price}</Text>
         </View>
       </ScrollView>
 
       <View style={{ gap: 14, alignItems: 'center' }}>
         <Button
-          title={busy ? 'One moment…' : `Subscribe for ${subscriptionService.priceLabel}`}
+          title={busy ? t('paywall.oneMoment') : t('paywall.subscribeFor', { price })}
           disabled={busy}
           style={{ alignSelf: 'stretch' }}
-          onPress={() => void run(() => subscriptionService.purchaseMonthly(), 'Subscribed')}
+          onPress={() => void run(() => subscriptionService.purchaseMonthly(), t('paywall.subscribedTitle'))}
         />
-        <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center' }}>
-          <Button title="Restore purchases" variant="ghost" style={{ paddingHorizontal: 0 }} disabled={busy} onPress={() => void run(() => subscriptionService.restore(), 'Restored')} />
+        <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Button
+            title={t('paywall.restore')}
+            variant="ghost"
+            style={{ paddingHorizontal: 0 }}
+            disabled={busy}
+            onPress={() => void run(() => subscriptionService.restore(), t('paywall.restoredTitle'))}
+          />
           <Pressable accessibilityRole="link" hitSlop={8} onPress={() => void Linking.openURL(TERMS_URL)}>
-            <Text style={styles.legal}>Terms</Text>
+            <Text style={styles.legal}>{t('paywall.terms')}</Text>
           </Pressable>
           <Pressable accessibilityRole="link" hitSlop={8} onPress={() => void Linking.openURL(PRIVACY_URL)}>
-            <Text style={styles.legal}>Privacy</Text>
+            <Text style={styles.legal}>{t('paywall.privacy')}</Text>
           </Pressable>
         </View>
       </View>
@@ -120,6 +121,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
     padding: 18,
     borderRadius: 20,
     borderWidth: 2,
@@ -127,6 +129,6 @@ const styles = StyleSheet.create({
   },
   priceTitle: { fontSize: 17, fontWeight: '800', color: colors.ink },
   priceHint: { fontSize: 14, color: colors.muted },
-  price: { fontSize: 22, fontWeight: '800', letterSpacing: -0.5, color: colors.ink },
+  price: { fontSize: 20, fontWeight: '800', letterSpacing: -0.5, color: colors.ink },
   legal: { fontSize: 14, fontWeight: '700', color: colors.muted, paddingVertical: 12 },
 });

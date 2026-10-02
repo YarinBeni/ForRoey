@@ -37,6 +37,12 @@ npx expo run:android --device
 
 Expo Go does not include the status-bar icon module or in-app purchases, so use a real build for those. Everything else works in Expo Go.
 
+## Languages
+
+Pacer ships in English, Hebrew, Arabic, Russian and Amharic. It follows the phone's language by default; Settings → Language overrides it. Hebrew and Arabic flip the whole layout to right-to-left (a restart is needed when switching direction). Notifications, the Android status-bar notification and dates are translated too.
+
+Strings live in `src/i18n/<code>.ts`; English is the source of truth and a test fails if any language is missing a key or a placeholder. The Amharic text was written without a native speaker and should be reviewed before launch.
+
 ## Quality checks
 
 ```bash

@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CloseIcon } from '../src/components/icons';
 import { Title } from '../src/components/ui';
 import { tzOffsetLabel } from '../src/domain/format';
+import { t } from '../src/i18n';
 import { useAppStore } from '../src/store/useAppStore';
 import { colors, spacing } from '../src/theme';
 
@@ -63,18 +64,18 @@ export default function TimeZoneScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Title size={28}>Time zone</Title>
-        <CloseIcon.Button accessibilityLabel="Close" onPress={() => router.back()} />
+        <Title size={28}>{t('timezone.title')}</Title>
+        <CloseIcon.Button accessibilityLabel={t('common.close')} onPress={() => router.back()} />
       </View>
       <TextInput
         value={query}
         onChangeText={setQuery}
-        placeholder="Search, e.g. Jerusalem"
+        placeholder={t('timezone.search')}
         placeholderTextColor={colors.muted}
         autoCapitalize="none"
         autoCorrect={false}
         style={styles.search}
-        accessibilityLabel="Search time zones"
+        accessibilityLabel={t('timezone.search')}
       />
       <FlatList
         data={zones}

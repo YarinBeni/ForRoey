@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="cig_channel_name">Окно для сигареты</string>
+  <string name="cig_channel_desc">Показывает догорающую сигарету в строке состояния, пока окно открыто.</string>
+  <string name="cig_title_open">Можно закурить</string>
+  <string name="cig_title_closed">Окно закрыто</string>
+  <string name="cig_text_open">Сигарета догорает, когда окно закрывается.</string>
+  <string name="cig_text_closed">Откройте Pacer, чтобы отметить.</string>
+</resources>

@@ -7,6 +7,7 @@ import { Stepper, Title } from '../src/components/ui';
 import { formatLongDate, formatShortDate } from '../src/domain/format';
 import { quitDateKey, stageCounts, stageInfo } from '../src/domain/plan';
 import { addDays, dateKeyInTz } from '../src/domain/time';
+import { t } from '../src/i18n';
 import { useAppStore } from '../src/store/useAppStore';
 import { colors, spacing } from '../src/theme';
 
@@ -15,7 +16,7 @@ export default function PlanScreen() {
   const settings = useAppStore((s) => s.settings);
   const plan = useAppStore((s) => s.plan);
   const updateSettings = useAppStore((s) => s.updateSettings);
-  if (!settings || !plan) return null;
+  if (!plan) return null;
 
   const todayKey = dateKeyInTz(new Date(), settings.timeZone);
   const today = stageInfo(settings, plan, todayKey);
@@ -26,16 +27,14 @@ export default function PlanScreen() {
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={{ gap: 24, paddingBottom: spacing.lg }} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <BackIcon.Button accessibilityLabel="Back to home" onPress={() => router.back()} />
-          <Title size={28}>Your plan</Title>
+          <BackIcon.Button accessibilityLabel={t('common.back')} onPress={() => router.back()} />
+          <Title size={28}>{t('plan.title')}</Title>
         </View>
 
         <View style={styles.quitCard}>
-          <Text style={styles.quitEyebrow}>Quit date</Text>
+          <Text style={styles.quitEyebrow}>{t('plan.quitDate')}</Text>
           <Text style={styles.quitDate}>{formatLongDate(quitKey)}</Text>
-          <Text style={styles.quitSub}>
-            One cigarette fewer every {settings.daysPerStage} days, starting {formatShortDate(plan.startDateKey)}.
-          </Text>
+          <Text style={styles.quitSub}>{t('plan.quitSub', { count: settings.daysPerStage, date: formatShortDate(plan.startDateKey) })}</Text>
         </View>
 
         <View style={{ gap: 10 }}>
@@ -51,9 +50,7 @@ export default function PlanScreen() {
                 </View>
                 <View style={{ flex: 1, gap: 6 }}>
                   <View style={styles.stageLine}>
-                    <Text style={[styles.stageName, isCurrent && { fontWeight: '800' }]}>
-                      {perDay} a day
-                    </Text>
+                    <Text style={[styles.stageName, isCurrent && { fontWeight: '800' }]}>{t('plan.perDay', { n: perDay })}</Text>
                     <Text style={styles.stageDates}>
                       {formatShortDate(startKey)} – {formatShortDate(endKey)}
                     </Text>
@@ -63,9 +60,7 @@ export default function PlanScreen() {
                       <View style={styles.bar}>
                         <View style={[styles.barFill, { width: `${Math.round((today.dayInStage / settings.daysPerStage) * 100)}%` }]} />
                       </View>
-                      <Text style={styles.stageDates}>
-                        Day {today.dayInStage} of {settings.daysPerStage}
-                      </Text>
+                      <Text style={styles.stageDates}>{t('plan.dayOf', { day: today.dayInStage, days: settings.daysPerStage })}</Text>
                     </>
                   ) : null}
                 </View>
@@ -76,16 +71,16 @@ export default function PlanScreen() {
 
         <View style={styles.settingRow}>
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={styles.settingLabel}>Days per stage</Text>
-            <Text style={styles.settingHint}>Slower is fine. Faster is braver.</Text>
+            <Text style={styles.settingLabel}>{t('plan.daysPerStage')}</Text>
+            <Text style={styles.settingHint}>{t('plan.daysPerStageHint')}</Text>
           </View>
           <Stepper
             value={settings.daysPerStage}
             min={1}
             max={60}
             onChange={(v) => void updateSettings({ daysPerStage: v })}
-            labelLess="Fewer days per stage"
-            labelMore="More days per stage"
+            labelLess={t('plan.daysPerStage')}
+            labelMore={t('plan.daysPerStage')}
           />
         </View>
       </ScrollView>
@@ -113,7 +108,7 @@ const styles = StyleSheet.create({
   stageCurrent: { borderWidth: 2, borderColor: colors.teal },
   stageBadge: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
   stageBadgeText: { fontSize: 20, fontWeight: '800', color: colors.ink },
-  stageLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  stageLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   stageName: { fontSize: 15, fontWeight: '700', color: colors.ink },
   stageDates: { fontSize: 13, fontWeight: '600', color: colors.muted },
   bar: { height: 6, borderRadius: 999, backgroundColor: colors.line, overflow: 'hidden' },
@@ -123,8 +118,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
-    paddingLeft: 16,
-    paddingRight: 12,
+    paddingStart: 16,
+    paddingEnd: 12,
     borderWidth: 1,
     borderColor: colors.line,
     borderRadius: 16,

@@ -26,7 +26,7 @@ export interface SubscriptionService {
   purchaseMonthly(): Promise<SubscriptionStatus>;
   /** Restore previous purchases (required by App Store review). */
   restore(): Promise<SubscriptionStatus>;
-  /** Human-readable price, e.g. "₪10 / month". */
+  /** Localized price amount, e.g. "₪10" (the UI appends the period). */
   readonly priceLabel: string;
 }
 
@@ -53,7 +53,7 @@ export function trialDaysFromConfig(): number {
 }
 
 function priceLabelFromConfig(): string {
-  return readExtra().priceLabel ?? '₪10 / month';
+  return readExtra().priceLabel ?? '₪10';
 }
 
 /** Compute a trial/expired status from the trial start instant. */

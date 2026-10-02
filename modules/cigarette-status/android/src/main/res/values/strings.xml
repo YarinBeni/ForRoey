@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="cig_channel_name">Smoking window</string>
+  <string name="cig_channel_desc">Shows a burning cigarette in the status bar while a smoking window is open.</string>
+  <string name="cig_title_open">You can smoke now</string>
+  <string name="cig_title_closed">Smoking window closed</string>
+  <string name="cig_text_open">The cigarette burns out when the window closes.</string>
+  <string name="cig_text_closed">Open Pacer to log it.</string>
+</resources>

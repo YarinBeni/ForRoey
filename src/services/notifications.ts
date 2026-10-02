@@ -9,6 +9,8 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
+import { t } from '../i18n';
+
 import type { DayLog, Slot } from '../domain/types';
 
 /** Android notification channel used for all slot reminders. */
@@ -31,15 +33,19 @@ export function configureNotificationHandler(): void {
     }),
   });
 
-  if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync(SLOTS_CHANNEL_ID, {
-      name: 'Cigarette slots',
-      description: 'Reminds you when your next planned cigarette is available.',
-      importance: Notifications.AndroidImportance.HIGH,
-      sound: 'default',
-      lightColor: '#157A6E',
-    }).catch((err) => console.warn('[notifications] channel setup failed', err));
-  }
+  ensureSlotChannel();
+}
+
+/** Create or rename the Android channel in the current language. Safe to call repeatedly. */
+export function ensureSlotChannel(): void {
+  if (Platform.OS !== 'android') return;
+  Notifications.setNotificationChannelAsync(SLOTS_CHANNEL_ID, {
+    name: t('notifications.channel'),
+    description: t('notifications.channelDesc'),
+    importance: Notifications.AndroidImportance.HIGH,
+    sound: 'default',
+    lightColor: '#157A6E',
+  }).catch((err) => console.warn('[notifications] channel setup failed', err));
 }
 
 /** Ask for permission if needed. Resolves true when notifications may be shown. */
@@ -101,8 +107,8 @@ export async function syncScheduledNotifications(
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'You can have a cigarette now',
-          body: `Slot ${slot.index + 1} of ${log.targetCount} today · next one in at least ${gapMinutes} min`,
+          title: t('notifications.title'),
+          body: t('notifications.body', { n: slot.index + 1, total: log.targetCount, gap: gapMinutes }),
           sound: 'default',
           data: { dateKey: log.dateKey, index: slot.index },
         },

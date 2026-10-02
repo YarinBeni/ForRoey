@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="cig_channel_name">فترة التدخين</string>
+  <string name="cig_channel_desc">يعرض سيجارة تحترق في شريط الحالة ما دامت فترة التدخين مفتوحة.</string>
+  <string name="cig_title_open">يمكنك التدخين الآن</string>
+  <string name="cig_title_closed">أُغلقت فترة التدخين</string>
+  <string name="cig_text_open">تنطفئ السيجارة عند إغلاق الفترة.</string>
+  <string name="cig_text_closed">افتح Pacer لتسجيلها.</string>
+</resources>

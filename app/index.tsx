@@ -11,6 +11,7 @@ import { quitDateKey, stageInfo } from '../src/domain/plan';
 import { formatMinuteOfDay } from '../src/domain/time';
 import type { Slot } from '../src/domain/types';
 import { useNow } from '../src/hooks/useNow';
+import { t } from '../src/i18n';
 import { useAppStore } from '../src/store/useAppStore';
 import { colors, spacing } from '../src/theme';
 
@@ -47,6 +48,7 @@ export default function HomeScreen() {
   const stage = stageInfo(settings, plan, todayLog.dateKey);
   const smokedCount = slots.filter((s) => s.status === 'smoked').length;
   const quitKey = quitDateKey(settings, plan);
+  const gap = formatGap(settings.minGapMinutes);
 
   const answer = (slot: Slot, status: 'smoked' | 'skipped') => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -63,13 +65,9 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={[styles.screen, { backgroundColor: colors.teal }]}>
         <View style={styles.alertBody}>
-          <Eyebrow light>Window open since {formatClock(openSlot.scheduledAtIso, settings.timeZone)}</Eyebrow>
-          <Text style={styles.alertTitle}>{closed ? 'Window closed.' : 'You can smoke now.'}</Text>
-          <Text style={styles.alertText}>
-            {closed
-              ? 'Still log it so your day stays honest. The next alert is on its way.'
-              : `Or skip it. Skipped slots count toward your step-down. Either way, the next alert is at least ${formatGap(settings.minGapMinutes)} away.`}
-          </Text>
+          <Eyebrow light>{t('home.windowOpenSince', { time: formatClock(openSlot.scheduledAtIso, settings.timeZone) })}</Eyebrow>
+          <Text style={styles.alertTitle}>{closed ? t('home.windowClosed') : t('home.youCanSmoke')}</Text>
+          <Text style={styles.alertText}>{closed ? t('home.alertClosed') : t('home.alertOpen', { gap })}</Text>
         </View>
         <View style={{ alignItems: 'center', gap: 12 }}>
           <BurningCigarette progress={progress} />
@@ -78,13 +76,13 @@ export default function HomeScreen() {
         <View style={{ alignItems: 'center', gap: 14, marginTop: 28 }}>
           <Dots total={slots.length} done={done} nextIndex={openSlot.index} onDark />
           <Text style={[styles.caption, { color: colors.tealLight }]}>
-            Slot {openSlot.index + 1} of {slots.length} · Stage {stage.stageNumber}
+            {t('home.slotOf', { n: openSlot.index + 1, total: slots.length, stage: stage.stageNumber })}
           </Text>
         </View>
         <View style={{ flex: 1 }} />
         <View style={{ gap: 12 }}>
-          <Button title="I smoked it" variant="onTeal" onPress={() => answer(openSlot, 'smoked')} />
-          <Button title="Skip this one" variant="onTealOutline" onPress={() => answer(openSlot, 'skipped')} />
+          <Button title={t('home.smokedIt')} variant="onTeal" onPress={() => answer(openSlot, 'smoked')} />
+          <Button title={t('home.skipIt')} variant="onTealOutline" onPress={() => answer(openSlot, 'skipped')} />
         </View>
       </SafeAreaView>
     );
@@ -95,37 +93,37 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={{ gap: 28, paddingBottom: spacing.lg }} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <View style={{ gap: 6 }}>
+          <View style={{ gap: 6, flex: 1 }}>
             <Text style={styles.date}>{formatLongDate(todayLog.dateKey)}</Text>
             <Chip>
               {stage.isQuit
-                ? 'Quit stage · 0 a day'
-                : `Stage ${stage.stageNumber} · ${stage.perDay} a day · Day ${stage.dayInStage} of ${stage.daysPerStage}`}
+                ? t('home.quitChip')
+                : t('home.stageChip', { stage: stage.stageNumber, perDay: stage.perDay, day: stage.dayInStage, days: stage.daysPerStage })}
             </Chip>
           </View>
           <Link href="/settings" asChild>
-            <GearIcon.Button accessibilityLabel="Settings" />
+            <GearIcon.Button accessibilityLabel={t('common.settings')} />
           </Link>
         </View>
 
         <View style={styles.hero}>
           {stage.isQuit ? (
             <>
-              <Eyebrow>Quit day</Eyebrow>
-              <Text style={styles.heroTitle}>No alerts.</Text>
-              <Text style={styles.heroSub}>You made it to zero. Keep the app for when a craving hits.</Text>
+              <Eyebrow>{t('home.quitEyebrow')}</Eyebrow>
+              <Text style={styles.heroTitle}>{t('home.quitTitle')}</Text>
+              <Text style={styles.heroSub}>{t('home.quitSub')}</Text>
             </>
           ) : nextSlot ? (
             <>
-              <Eyebrow>Next cigarette</Eyebrow>
+              <Eyebrow>{t('home.nextCigarette')}</Eyebrow>
               <Text style={styles.heroTime}>{formatClock(nextSlot.scheduledAtIso, settings.timeZone)}</Text>
               <Text style={styles.heroSub}>{formatCountdown(new Date(nextSlot.scheduledAtIso).getTime() - nowMs)}</Text>
             </>
           ) : (
             <>
-              <Eyebrow>Done for today</Eyebrow>
-              <Text style={styles.heroTitle}>That&apos;s all.</Text>
-              <Text style={styles.heroSub}>Alerts start again tomorrow after {formatMinuteOfDay(settings.wakeMinutes)}.</Text>
+              <Eyebrow>{t('home.doneEyebrow')}</Eyebrow>
+              <Text style={styles.heroTitle}>{t('home.doneTitle')}</Text>
+              <Text style={styles.heroSub}>{t('home.doneSub', { time: formatMinuteOfDay(settings.wakeMinutes) })}</Text>
             </>
           )}
         </View>
@@ -133,9 +131,7 @@ export default function HomeScreen() {
         {!stage.isQuit ? (
           <View style={{ alignItems: 'center', gap: 14 }}>
             <Dots total={slots.length} done={done} nextIndex={nextSlot?.index ?? null} />
-            <Text style={styles.caption}>
-              {smokedCount} of {slots.length} today
-            </Text>
+            <Text style={styles.caption}>{t('home.countToday', { done: smokedCount, total: slots.length })}</Text>
           </View>
         ) : null}
 
@@ -145,9 +141,16 @@ export default function HomeScreen() {
               const passed = new Date(slot.scheduledAtIso).getTime() <= nowMs;
               const isNext = nextSlot?.index === slot.index;
               const label =
-                slot.status === 'smoked' ? 'Smoked' : slot.status === 'skipped' ? 'Skipped' : passed ? 'Missed' : isNext ? 'Next' : 'Later';
-              const tone =
-                slot.status === 'smoked' ? colors.tealDeep : isNext ? colors.amberDeep : colors.muted;
+                slot.status === 'smoked'
+                  ? t('home.smoked')
+                  : slot.status === 'skipped'
+                    ? t('home.skipped')
+                    : passed
+                      ? t('home.missed')
+                      : isNext
+                        ? t('home.next')
+                        : t('home.later');
+              const tone = slot.status === 'smoked' ? colors.tealDeep : isNext ? colors.amberDeep : colors.muted;
               return (
                 <View
                   key={slot.index}
@@ -163,12 +166,10 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        <Body style={{ fontSize: 14, textAlign: 'center' }}>
-          Alerts arrive at random times, at least {formatGap(settings.minGapMinutes)} apart.
-        </Body>
+        <Body style={{ fontSize: 14, textAlign: 'center' }}>{t('home.hint', { gap })}</Body>
 
         <Link href="/plan" asChild>
-          <Button title={`See my plan · quit on ${formatShortDate(quitKey)}`} variant="secondary" />
+          <Button title={t('home.seePlan', { date: formatShortDate(quitKey) })} variant="secondary" />
         </Link>
       </ScrollView>
     </SafeAreaView>
@@ -177,11 +178,11 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.ground, paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
   date: { fontSize: 15, fontWeight: '600', color: colors.muted },
   hero: { alignItems: 'center', gap: 8, paddingTop: 36, paddingBottom: 20 },
   heroTime: { fontSize: 88, lineHeight: 92, fontWeight: '800', letterSpacing: -3, color: colors.ink, fontVariant: ['tabular-nums'] },
-  heroTitle: { fontSize: 44, lineHeight: 48, fontWeight: '800', letterSpacing: -1, color: colors.ink },
+  heroTitle: { fontSize: 44, lineHeight: 48, fontWeight: '800', letterSpacing: -1, color: colors.ink, textAlign: 'center' },
   heroSub: { fontSize: 18, fontWeight: '600', color: colors.muted, textAlign: 'center' },
   caption: { fontSize: 15, fontWeight: '600', color: colors.muted },
   list: { borderWidth: 1, borderColor: colors.line, borderRadius: 20, overflow: 'hidden' },

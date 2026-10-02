@@ -7,6 +7,13 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 
+class StringsRecord : Record {
+  @Field val titleOpen: String = ""
+  @Field val titleClosed: String = ""
+  @Field val textOpen: String = ""
+  @Field val textClosed: String = ""
+}
+
 class WindowRecord : Record {
   @Field val id: String = ""
   @Field val openAtMs: Double = 0.0
@@ -26,6 +33,10 @@ class CigaretteStatusModule : Module() {
         context,
         windows.map { Window(it.id, it.openAtMs.toLong(), it.windowMs.toLong()) },
       )
+    }
+
+    Function("setStrings") { strings: StringsRecord ->
+      CigaretteStatus.setStrings(context, strings.titleOpen, strings.titleClosed, strings.textOpen, strings.textClosed)
     }
 
     Function("cancelAll") {
